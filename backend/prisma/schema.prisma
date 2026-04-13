@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  expoToken String?  @unique
+  createdAt DateTime @default(now())
+  alerts    AlertRule[]
+}
+
+model PriceRecord {
+  id        Int      @id @default(autoincrement())
+  symbol    String   // e.g., 'SJC', 'PNJ', 'DOJI', 'USD/VND'
+  category  String   // e.g., 'GOLD', 'FOREX'
+  buyPrice  Float?
+  sellPrice Float?
+  source    String   // Source website or API
+  recordedAt  DateTime // Business time of the rate
+  createdAt DateTime @default(now())
+
+  @@index([symbol, recordedAt(sort: Desc)])
+}
+
+model AlertRule {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  symbol    String   // e.g., 'SJC'
+  condition String   // 'GREATER_THAN', 'LESS_THAN'
+  targetField String // 'BUY', 'SELL'
+  threshold Float    
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
